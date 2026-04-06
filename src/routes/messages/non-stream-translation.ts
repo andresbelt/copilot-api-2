@@ -47,13 +47,12 @@ export function translateToOpenAI(
 }
 
 function translateModelName(model: string): string {
-  // Subagent requests use a specific model number which Copilot doesn't support
-  if (model.startsWith("claude-sonnet-4-")) {
-    return model.replace(/^claude-sonnet-4-.*/, "claude-sonnet-4")
-  } else if (model.startsWith("claude-opus-")) {
-    return model.replace(/^claude-opus-4-.*/, "claude-opus-4")
-  }
-  return model
+  // Claude Code sends model names with dashes (e.g. claude-sonnet-4-6)
+  // but Copilot expects dots (e.g. claude-sonnet-4.6)
+  return model.replace(
+    /^(claude-(?:sonnet|opus|haiku))-(\d+)-(\d+)/,
+    "$1-$2.$3",
+  )
 }
 
 function translateAnthropicMessagesToOpenAI(
