@@ -11,7 +11,16 @@ import { usageRoute } from "./routes/usage/route"
 
 export const server = new Hono()
 
-server.use(logger())
+server.use(async (c, next) => {
+  const userAgent = c.req.header("user-agent") ?? "unknown"
+  const start = Date.now()
+  console.log(`<-- ${c.req.method} ${c.req.path} [${userAgent}]`)
+  await next()
+  const elapsed = Date.now() - start
+  console.log(
+    `--> ${c.req.method} ${c.req.path} ${c.res.status} ${elapsed}ms [${userAgent}]`,
+  )
+})
 server.use(cors())
 
 server.get("/", (c) => c.text("Server running"))

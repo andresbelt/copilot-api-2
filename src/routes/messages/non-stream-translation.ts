@@ -47,10 +47,11 @@ export function translateToOpenAI(
 }
 
 function translateModelName(model: string): string {
-  // Claude Code sends model names with dashes (e.g. claude-sonnet-4-6)
-  // but Copilot expects dots (e.g. claude-sonnet-4.6)
+  // Claude Code sends model names with dashes (e.g. claude-sonnet-4-6) and
+  // sometimes a trailing date suffix (e.g. claude-haiku-4-5-20251001), but
+  // Copilot expects dotted versions without the date (e.g. claude-haiku-4.5).
   return model.replace(
-    /^(claude-(?:sonnet|opus|haiku))-(\d+)-(\d+)/,
+    /^(claude-(?:sonnet|opus|haiku))-(\d+)-(\d+).*$/,
     "$1-$2.$3",
   )
 }
