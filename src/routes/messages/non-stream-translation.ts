@@ -50,10 +50,23 @@ function translateModelName(model: string): string {
   // Claude Code sends model names with dashes (e.g. claude-sonnet-4-6) and
   // sometimes a trailing date suffix (e.g. claude-haiku-4-5-20251001), but
   // Copilot expects dotted versions without the date (e.g. claude-haiku-4.5).
-  return model.replace(
-    /^(claude-(?:sonnet|opus|haiku))-(\d+)-(\d+).*$/,
-    "$1-$2.$3",
+  // Handles formats:
+  //   claude-opus-4-7-20250514  -> claude-opus-4.7
+  //   claude-opus-4.7-20250514  -> claude-opus-4.7
+  //   claude-opus-4-7           -> claude-opus-4.7
+  //   claude-sonnet-4-6         -> claude-sonnet-4.6
+
+  // Already dot-versioned with date suffix: claude-opus-4.7-20250514
+  const dotWithDate = model.match(/^(claude-[a-z]+-\d+\.\d+)-\d{6,8}$/)
+  if (dotWithDate) return dotWithDate[1]
+
+  // Dash-versioned with optional date suffix: claude-opus-4-7 or claude-opus-4-7-20250514
+  const dashVersioned = model.match(
+    /^(claude-(?:opus|sonnet|haiku))-(\d+)-(\d+)(?:-\d{6,8})?$/,
   )
+  if (dashVersioned) return `${dashVersioned[1]}-${dashVersioned[2]}.${dashVersioned[3]}`
+
+  return model
 }
 
 function translateAnthropicMessagesToOpenAI(
